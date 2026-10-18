@@ -9,60 +9,208 @@
 * { box-sizing: border-box; }
 body {
   margin: 0; font-family: Arial, sans-serif;
-  background: #0d1020; color: white;
-  min-height: 100vh; display: grid; place-items: center;
+  background: #0b0d14; color: #f5f5fa;
 }
-main {
-  width: min(700px, 92%); padding: 28px;
-  background: #171b30; border: 1px solid #303654;
-  border-radius: 20px;
+header {
+  padding: 18px 24px; border-bottom: 1px solid #292d3b;
+  display: flex; align-items: center; gap: 12px;
 }
-.logo { font-size: 38px; margin-bottom: 8px; }
-h1 { margin: 0; font-size: 32px; }
-p { color: #b8c0dc; line-height: 1.6; }
-textarea {
-  width: 100%; min-height: 130px; padding: 15px;
-  border-radius: 12px; border: 1px solid #414969;
-  background: #0d1020; color: white; font: inherit;
-  resize: vertical;
+.logo {
+  background: #7657ff; padding: 10px; border-radius: 12px;
 }
-button {
-  margin-top: 12px; padding: 13px 18px; border: 0;
-  border-radius: 10px; background: #7657ff;
-  color: white; font-weight: bold; cursor: pointer;
+header h1 { font-size: 21px; margin: 0; }
+header p { color: #999fb4; margin: 4px 0 0; font-size: 12px; }
+main { max-width: 850px; margin: auto; padding: 32px 18px; }
+h2 { font-size: 28px; margin-bottom: 8px; }
+.intro { color: #a9aec2; line-height: 1.6; }
+#chat {
+  margin-top: 25px; display: flex; flex-direction: column;
+  gap: 14px;
 }
-button:hover { background: #8c73ff; }
-#answer {
-  margin-top: 20px; padding: 15px;
-  background: #0d1020; border-radius: 12px;
+.message {
+  padding: 16px; border-radius: 14px; line-height: 1.6;
   white-space: pre-wrap; overflow-wrap: anywhere;
 }
-small { color: #8f9abb; }
+.bot { background: #171a27; border: 1px solid #292d3b; }
+.user { background: #292044; align-self: flex-end; max-width: 90%; }
+.tag { color: #a99aff; font-size: 12px; margin-bottom: 8px; }
+textarea {
+  width: 100%; min-height: 100px; resize: vertical;
+  padding: 15px; background: #121521; color: white;
+  border: 1px solid #363b50; border-radius: 12px;
+  font: inherit; outline: none;
+}
+textarea:focus { border-color: #8b75ff; }
+button {
+  cursor: pointer; border: 0; border-radius: 10px;
+  padding: 12px 17px; font-weight: bold;
+}
+.primary { background: #7657ff; color: white; }
+.secondary { background: #292d3b; color: white; }
+.actions { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.code {
+  background: #090b11; border: 1px solid #303548;
+  border-radius: 10px; overflow: hidden; margin-top: 12px;
+}
+.codehead {
+  padding: 12px; background: #1b1e2b; color: #bfc4d7;
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 10px;
+}
+pre {
+  margin: 0; padding: 16px; overflow-x: auto;
+  color: #b8f2c5; font-size: 13px; line-height: 1.6;
+}
+.note { color: #9097ad; font-size: 12px; line-height: 1.5; }
+footer { text-align: center; padding: 25px; color: #777e94; font-size: 12px; }
 </style>
 </head>
 <body>
-<main>
+<header>
   <div class="logo">🤖</div>
-  <h1>Roblox AI</h1>
-  <p>Deine eigene KI für Roblox-Spielideen und Skripte.</p>
-  <textarea id="idea" placeholder="Beschreibe dein Spiel, z. B. Erstelle ein Pet-System mit Coins ..."></textarea>
-  <button onclick="generate()">Idee vorbereiten</button>
-  <div id="answer">Deine Spielidee erscheint hier.</div>
-  <p><small>Version 1.0 · Dein eigenes Roblox-AI-Projekt</small></p>
+  <div>
+    <h1>Roblox AI</h1>
+    <p>Dein Assistent für Roblox Studio</p>
+  </div>
+</header>
+
+<main>
+  <h2>Was bauen wir heute?</h2>
+  <p class="intro">
+    Beschreibe deine Spielidee. Roblox AI hilft dir beim Erstellen
+    von Lua-Skripten für dein Roblox-Spiel.
+  </p>
+
+  <div id="chat">
+    <div class="message bot">
+      <div class="tag">ROBLOX AI</div>
+      Hallo! 👋 Ich helfe dir beim Entwickeln deines Roblox-Spiels.
+      Beschreibe, was du bauen möchtest, um loszulegen.
+    </div>
+  </div>
+
+  <div style="margin-top:24px">
+    <textarea id="idea" placeholder="Zum Beispiel: Erstelle einen roten Würfel ..."></textarea>
+    <div class="actions">
+      <button class="primary" id="send">Senden ↗</button>
+      <button class="secondary" id="clear">Chat leeren</button>
+    </div>
+    <p class="note">
+      Aktuelle Demo: Die KI-Verbindung ist noch nicht eingerichtet.
+      Teste die Oberfläche mit einem Beispiel.
+    </p>
+  </div>
 </main>
+
+<footer>Roblox AI · Dein eigenes Projekt</footer>
+
 <script>
-function generate() {
-  const idea = document.getElementById("idea").value.trim();
-  const answer = document.getElementById("answer");
-  if (!idea) {
-    answer.textContent = "Schreibe zuerst deine Spielidee hinein.";
+const chat = document.getElementById("chat");
+const idea = document.getElementById("idea");
+
+function addMessage(text, type) {
+  const el = document.createElement("div");
+  el.className = "message " + type;
+  el.textContent = text;
+  chat.appendChild(el);
+  return el;
+}
+
+function makeCode(text) {
+  const lower = text.toLowerCase();
+
+  if (lower.includes("würfel") || lower.includes("cube") ||
+      lower.includes("block")) {
+    return `local part = Instance.new("Part")
+part.Name = "RobloxAICube"
+part.Size = Vector3.new(4, 4, 4)
+part.Color = Color3.fromRGB(255, 0, 0)
+part.Position = Vector3.new(0, 5, 0)
+part.Anchored = true
+part.Parent = workspace`;
+  }
+
+  return `-- Roblox AI Demo
+-- Deine Anfrage: ${text.replace(/[\r\n]/g, " ").slice(0, 180)}
+-- Dies ist nur eine Vorlage, noch keine KI-generierte Lösung.
+-- Verbinde zuerst ein KI-Modell, um passenden Code zu erzeugen.
+
+print("Roblox AI: Bitte ergänze hier dein Skript.")`;
+}
+
+function addCode(code) {
+  const wrap = document.createElement("div");
+  wrap.className = "code";
+
+  const head = document.createElement("div");
+  head.className = "codehead";
+
+  const label = document.createElement("span");
+  label.textContent = "Luau · Roblox Script";
+
+  const copy = document.createElement("button");
+  copy.className = "secondary";
+  copy.textContent = "Code kopieren";
+  copy.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      copy.textContent = "Kopiert ✓";
+    } catch {
+      const area = document.createElement("textarea");
+      area.value = code;
+      document.body.appendChild(area);
+      area.select();
+      document.execCommand("copy");
+      area.remove();
+      copy.textContent = "Kopiert ✓";
+    }
+  };
+
+  head.append(label, copy);
+
+  const pre = document.createElement("pre");
+  pre.textContent = code;
+  wrap.append(head, pre);
+  chat.appendChild(wrap);
+}
+
+document.getElementById("send").onclick = () => {
+  const text = idea.value.trim();
+  if (!text) {
+    idea.focus();
     return;
   }
-  answer.textContent =
-    "Deine Spielidee:\n\n" + idea +
-    "\n\nNächster Schritt: Verbinde Roblox AI mit einem KI-Modell, " +
-    "damit echte Skripte automatisch erzeugt werden können.";
-}
+
+  addMessage(text, "user");
+  const response = addMessage(
+    "Demo-Modus: Ich zeige dir eine einfache Vorlage. Eine echte KI muss noch verbunden werden.",
+    "bot"
+  );
+  response.innerHTML = "";
+  const tag = document.createElement("div");
+  tag.className = "tag";
+  tag.textContent = "ROBLOX AI · DEMO";
+  response.appendChild(tag);
+  const desc = document.createElement("p");
+  desc.textContent = "Hier ist eine einfache Code-Vorlage. Sie ist noch nicht automatisch an deine ganze Spielidee angepasst.";
+  response.appendChild(desc);
+
+  addCode(makeCode(text));
+  idea.value = "";
+};
+
+document.getElementById("clear").onclick = () => {
+  chat.innerHTML = "";
+  addMessage("Hallo! 👋 Beschreibe, was du in Roblox bauen möchtest.", "bot");
+};
+
+idea.addEventListener("keydown", event => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    document.getElementById("send").click();
+  }
+});
 </script>
 </body>
 </html>
+
